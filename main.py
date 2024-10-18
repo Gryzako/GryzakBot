@@ -11,7 +11,7 @@ class App(ck.CTk):
     def __init__(self):
         super().__init__()
         #Configure window
-        self.geometry('400x600')
+        self.geometry('400x450')
         self.resizable(False, False)
         self.title('Gryzak bot 1.0')
 

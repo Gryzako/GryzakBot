@@ -1,4 +1,5 @@
 import time
+import pyautogui
 import cv2
 import threading
 from obswebsocket import obsws, requests
@@ -16,7 +17,6 @@ class Obs():
     
     def disconnectFromOBS(self, connection):
         connection.disconnect()
-
 
     def capture_screenshot(self, connection):
         try:
@@ -69,9 +69,11 @@ class Obs():
                 ring = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfRing)
                 if ring[0] == True:
                     print(f'znaleziono ring: {ring}')
+                    pyautogui.press('2')
                 amulet = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfAmulet)
                 if amulet[0] == True:
                     print(f'znaleziono amulet: {amulet}')
+                    pyautogui.press('1')
             time.sleep(1)
         
         conn.disconnect()
