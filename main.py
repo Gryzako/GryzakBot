@@ -1,6 +1,6 @@
 import customtkinter as ck
 from datetime import datetime
-from actions import Obs
+from amulet_and_ring_detector import AmuletAndRingDetector
 import time
 
 ck.set_appearance_mode('Dark')
@@ -24,23 +24,15 @@ class App(ck.CTk):
         #Tab configuration
         self.tab = ck.CTkTabview(self, width=400, height=300)
         self.tab.grid(row=0, column=0)
-        self.tab.add('OBS')
+        self.tab.add('AutoHealing')
         self.tab.add('Ring&Amu')
         self.logBox = ck.CTkTextbox(self, state='disabled', width=400, height=150)
         self.logBox.grid(row=1, column=0)
 
-        #OBS configuration
-        self.portLabel = self.create_label(self.tab.tab('OBS'), "Port: ")
-        self.portLabel.grid(row=0, column=0)
-        self.portTextbox = self.create_entry(self.tab.tab('OBS'))
-        self.portTextbox.grid(row=0, column=1)
-        self.passwordLabel = self.create_label(self.tab.tab('OBS'), 'Password: ')
-        self.passwordLabel.grid(row=1, column=0)
-        self.passwordTextbox = self.create_entry(self.tab.tab('OBS'))
-        self.passwordTextbox.grid(row=1, column=1)
+        #AutoHealing configuration
 
 
-        #Rin&Amu configuration
+        #Ring&Amu configuration
         self.stoneskincheckbox = self.create_checkbox(self.tab.tab('Ring&Amu'), text='Stone Skin')
         self.stoneskincheckbox.grid(row=0, column=0, pady=5)
         self.mightringcheckbox = self.create_checkbox(self.tab.tab('Ring&Amu'), text='Might Ring')
@@ -75,17 +67,16 @@ class App(ck.CTk):
         stoneSkinStatus = self.stoneskincheckbox.get()
         mightRingStatus = self.mightringcheckbox.get()
 
-        obs_instance = Obs()
+        obs_instance = AmuletAndRingDetector()
         self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self)
-        self.logging(f"Uruchomiono zakładanie: {stoneSkinStatus}, {mightRingStatus}")
-
-
+        self.logging(f"Started auto amulet and ring")
 
     def amuAndRingDisableButtonFunc(self):
         self.amuAndRingEnableButton.configure(state='normal')
         self.amuAndRingDisableButton.configure(state='disabled')
-        obs_instance = Obs()
+        obs_instance = AmuletAndRingDetector()
         obs_instance.stopAmuAndRingEvent(self.AmuRingStop_event, self.amuRingThread)
+        self.logging(f"Stopped auto amulet and ring")
 
 
 if __name__ == "__main__":
