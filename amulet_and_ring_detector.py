@@ -1,6 +1,7 @@
 import time
 import pyautogui
 import cv2
+from PIL import Image
 import threading
 from obswebsocket import obsws, requests
 
@@ -63,30 +64,57 @@ class AmuletAndRingDetector():
         else:
             print(f'Nie znaleziono obrazu. Wartość dopasowania: {max_val}')
             return False, None
+        
+    def check_pixel_color(self, x, y, target_color, tolerance=5):
+        image = Image.open("C:/Users/michal/Documents/screenshot.png" )
 
-    def compare(self, stop_event, ss, might):
+        # Get the RGB value of the pixel at the specified coordinates
+        pixel_color = image.getpixel((x, y))
+        pixel_color_rgb = pixel_color[:3]
+        print(pixel_color_rgb)
+
+        r_diff = abs(pixel_color_rgb[0] - target_color[0])
+        g_diff = abs(pixel_color_rgb[1] - target_color[1])
+        b_diff = abs(pixel_color_rgb[2] - target_color[2])
+
+        # If all differences are within the specified tolerance, return True
+        if r_diff <= tolerance and g_diff <= tolerance and b_diff <= tolerance:
+            return True
+        else:
+            return False
+
+    def compare(self, stop_event, ss, might, automana):
         conn = self.connectToOBS(self.host, self.port, self.password)
 
         while not stop_event.is_set():
             screenShotFromObs = self.capture_screenshot(conn)
 
             if screenShotFromObs is not None:
-                ring = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfRing)
-                if ring[0] == True and might == 1:
-                    print(f'znaleziono ring: {ring}')
-                    pyautogui.press('2')
-                amulet = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfAmulet)
-                if amulet[0] == True and ss == 1:
-                    print(f'znaleziono amulet: {amulet}')
-                    pyautogui.press('1')
+                if might == 1:
+                    ring = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfRing)
+                    if ring[0] == True:
+                        print(f'znaleziono ring: {ring}')
+                        pyautogui.press('2')
+                if ss == 1:
+                    amulet = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfAmulet)
+                    if amulet[0] == True:
+                        print(f'znaleziono amulet: {amulet}')
+                        pyautogui.press('1')
+                if automana == 1:
+                    if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
+                        print('Mana Pełna')
+                    else:
+                        print('doladuj mane')
+                        pyautogui.press('0')
+
             time.sleep(1)
         
         conn.disconnect()
 
-    def startAmuAndRingEvent(self, stop_event, ss, might):
+    def startAmuAndRingEvent(self, stop_event, ss, might, automana):
         stop_event = threading.Event()
-        thread  = threading.Thread(target=self.compare, args=(stop_event, ss, might))
-        thread .start()
+        thread  = threading.Thread(target=self.compare, args=(stop_event, ss, might, automana))
+        thread.start()
         return thread , stop_event
     
     def stopAmuAndRingEvent(self, stop_event, process):

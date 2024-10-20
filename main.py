@@ -107,8 +107,9 @@ class App(ck.CTk):
         self.stopButton.configure(state='normal')
         stoneSkinStatus = self.stoneskincheckbox.get()
         mightRingStatus = self.mightringcheckbox.get()
+        autoManaStatus = self.autoMana.get()
         obs_instance = AmuletAndRingDetector()
-        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, stoneSkinStatus, mightRingStatus)
+        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, stoneSkinStatus, mightRingStatus, autoManaStatus)
         self.logging(f"Program started you enabled:")
 
     def stopButton(self):
