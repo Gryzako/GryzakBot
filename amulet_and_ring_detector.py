@@ -83,7 +83,7 @@ class AmuletAndRingDetector():
         else:
             return False
 
-    def compare(self, stop_event, ss, might, automana):
+    def compare(self, stop_event, ss, might, automana, autoRuns):
         conn = self.connectToOBS(self.host, self.port, self.password)
 
         while not stop_event.is_set():
@@ -106,14 +106,25 @@ class AmuletAndRingDetector():
                     else:
                         print('doladuj mane')
                         pyautogui.press('0')
+                if autoRuns == 1:
+                    for i in range(40):
+                        if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
+                            print('Mana Pełna')
+                            pyautogui.press('f6')
+                        else:
+                            print('doladuj mane')
+                            pyautogui.press('0')
+                            time.sleep(0.1)
+                            pyautogui.press('f6')
+
 
             time.sleep(1)
         
         conn.disconnect()
 
-    def startAmuAndRingEvent(self, stop_event, ss, might, automana):
+    def startAmuAndRingEvent(self, stop_event, ss, might, automana, autoRuns):
         stop_event = threading.Event()
-        thread  = threading.Thread(target=self.compare, args=(stop_event, ss, might, automana))
+        thread  = threading.Thread(target=self.compare, args=(stop_event, ss, might, automana, autoRuns))
         thread.start()
         return thread , stop_event
     

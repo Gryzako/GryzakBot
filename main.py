@@ -1,4 +1,6 @@
 import customtkinter as ck
+import pygetwindow as gw
+from pywinauto import Application
 from datetime import datetime
 from amulet_and_ring_detector import AmuletAndRingDetector
 
@@ -51,6 +53,10 @@ class App(ck.CTk):
         self.exuraMaxVitaLebale.grid(row=2, column=2)
         self.exuraMaxVitaButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.exuraMaxVitaButton))
         self.exuraMaxVitaButton.grid(row=2, column=3)
+        self.UltimateManaLebale = self.create_label(self.tab.tab('Config'), text='Ultimate Mana')
+        self.UltimateManaLebale.grid(row=3, column=0)
+        self.UltimateButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.UltimateButton))
+        self.UltimateButton.grid(row=3, column=1)
 
         #BOTconfiguration
         self.amuAndRingLabel = self.create_label(self.tab.tab('BOT'), text="Auto Ring and Amulet:")
@@ -59,12 +65,14 @@ class App(ck.CTk):
         self.stoneskincheckbox.grid(row=1, column=0, sticky="w", pady=2)
         self.mightringcheckbox = self.create_checkbox(self.tab.tab('BOT'), text='Might Ring')
         self.mightringcheckbox.grid(row=2, column=0, pady=2, sticky="w")
-        self.healingLabel = self.create_label(self.tab.tab('BOT'), text="Auto Healing and Mana:")
+        self.healingLabel = self.create_label(self.tab.tab('BOT'), text="Auto Healing, Mana and Runs:")
         self.healingLabel.grid(row=3, column=0, sticky="w") 
         self.autoHealing = self.create_checkbox(self.tab.tab('BOT'), text='Healing')
         self.autoHealing.grid(row=4, column=0, pady=2, sticky="w")
         self.autoMana = self.create_checkbox(self.tab.tab('BOT'), text='Mana')
         self.autoMana.grid(row=5, column=0, pady=2, sticky="w")
+        self.makeRuns = self.create_checkbox(self.tab.tab('BOT'), text='Make runs')
+        self.makeRuns.grid(row=4, column=1, pady=2, sticky="w")
         self.startButton = self.create_button(self.tab.tab('BOT'), text='Start', command=self.startButton)
         self.startButton.grid(row=6, column=0, pady=2, padx=5, sticky="e")
         self.stopButton = self.create_button(self.tab.tab('BOT'), text='Stop', state='disabled', command=self.stopButton)
@@ -94,6 +102,23 @@ class App(ck.CTk):
     def start_key_assignment(self, button):
         self.logging("Press key...")
         app.bind("<KeyPress>", lambda event: self.on_assign_key_press(event, button)) 
+
+    def find_and_focus_tibia_window(self):
+        #get all open windows
+        all_widnows = gw.getAllTitles()
+        #find Tibia window
+        tibia_title_window = None
+        for title in all_widnows:
+            if title.startswith('Tibia'):
+                tibia_title_window = title
+                break
+        if tibia_title_window:
+            app = Application().connect(title=tibia_title_window)
+            window = app[tibia_title_window]
+            window.set_focus()
+            self.logging(f"Program started")
+        else:
+            self.logging(f"Canot' find Tibia window")
     
     def logging(self, message):
         self.now = datetime.now()
@@ -108,16 +133,17 @@ class App(ck.CTk):
         stoneSkinStatus = self.stoneskincheckbox.get()
         mightRingStatus = self.mightringcheckbox.get()
         autoManaStatus = self.autoMana.get()
+        runsStatus = self.makeRuns.get()
         obs_instance = AmuletAndRingDetector()
-        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, stoneSkinStatus, mightRingStatus, autoManaStatus)
-        self.logging(f"Program started you enabled:")
+        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, stoneSkinStatus, mightRingStatus, autoManaStatus, runsStatus)
+        self.find_and_focus_tibia_window()
 
     def stopButton(self):
         self.startButton.configure(state='normal')
         self.stopButton.configure(state='disabled')
         obs_instance = AmuletAndRingDetector()
         obs_instance.stopAmuAndRingEvent(self.AmuRingStop_event, self.amuRingThread)
-        self.logging(f"Stopped auto amulet and ring")
+        self.logging(f"Stopped application")
 
 if __name__ == "__main__":
     app = App()
