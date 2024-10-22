@@ -130,12 +130,11 @@ class App(ck.CTk):
     def startButton(self):
         self.startButton.configure(state='disabled')
         self.stopButton.configure(state='normal')
-        stoneSkinStatus = self.stoneskincheckbox.get()
-        mightRingStatus = self.mightringcheckbox.get()
-        autoManaStatus = self.autoMana.get()
-        runsStatus = self.makeRuns.get()
+        buttonStatuses = [self.mightringcheckbox.get(), self.stoneskincheckbox.get(), self.autoMana.get(), self.makeRuns.get(), self.autoHealing.get()]
+        assignedKeyStatus = [self.mightButton.cget('text'), self.ssButton.cget('text'), self.UltimateButton.cget('text'), self.exuraVitaButton.cget('text')] 
+        print(assignedKeyStatus)
         obs_instance = AmuletAndRingDetector()
-        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, stoneSkinStatus, mightRingStatus, autoManaStatus, runsStatus)
+        self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, buttonStatuses, assignedKeyStatus)
         self.find_and_focus_tibia_window()
 
     def stopButton(self):

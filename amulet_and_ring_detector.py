@@ -19,10 +19,9 @@ class AmuletAndRingDetector():
         #coordinates
         self.manaY = 137
         self.lifeY = 125
-        self.almostFullX = 1850
+        self.almostFullX = 1845
         self.halfX = 1810
-        self.lessThenHalfX = 1794
-
+        self.criticalX = 1790
 
     def connectToOBS(self, host, port, password):
         ws = obsws(host=host, port=port, password=password)
@@ -82,49 +81,64 @@ class AmuletAndRingDetector():
             return True
         else:
             return False
+        
+    def checkingLife(self, buttons):
+        might = buttons[0]
+        ss = buttons[1]
+        vita = buttons[3]
+        try:
+            if not self.check_pixel_color(self.criticalX, self.lifeY, self.life_target_color):
+                print('stone skin might i utama + leczenie')
+            elif not self.check_pixel_color(self.halfX, self.lifeY, self.life_target_color):
+                print('max vita')
+            elif not self.check_pixel_color(self.almostFullX, self.lifeY, self.life_target_color):
+                pyautogui.press(vita)
+                print('vita')
+        except Exception as e:
+            print(e)
 
-    def compare(self, stop_event, ss, might, automana, autoRuns):
+    def compare(self, stop_event, buttonStatuses, assignedKeyStatus):
         conn = self.connectToOBS(self.host, self.port, self.password)
 
         while not stop_event.is_set():
             screenShotFromObs = self.capture_screenshot(conn)
 
             if screenShotFromObs is not None:
-                if might == 1:
+                if buttonStatuses[0] == 1:
                     ring = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfRing)
                     if ring[0] == True:
                         print(f'znaleziono ring: {ring}')
-                        pyautogui.press('2')
-                if ss == 1:
+                        pyautogui.press(assignedKeyStatus[0])
+                if buttonStatuses[1] == 1:
                     amulet = self.find_image_on_screenshot(screenShotFromObs, self.pictureOfAmulet)
                     if amulet[0] == True:
                         print(f'znaleziono amulet: {amulet}')
-                        pyautogui.press('1')
-                if automana == 1:
+                        pyautogui.press(assignedKeyStatus[1])
+                if buttonStatuses[2] == 1:
                     if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
                         print('Mana Pełna')
                     else:
                         print('doladuj mane')
                         pyautogui.press('0')
-                if autoRuns == 1:
-                    for i in range(40):
-                        if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
-                            print('Mana Pełna')
-                            pyautogui.press('f6')
-                        else:
-                            print('doladuj mane')
-                            pyautogui.press('0')
-                            time.sleep(0.1)
-                            pyautogui.press('f6')
-
+                if buttonStatuses[3] == 1:
+                    if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
+                        pyautogui.press('f6')
+                        print('tylko runa')
+                        time.sleep(1)
+                    else:
+                        pyautogui.press('0')
+                        time.sleep(0.1)
+                        pyautogui.press('f6')
+                        print('mana i runa')
+                if buttonStatuses[4] == 1:
+                    self.checkingLife(assignedKeyStatus)
 
             time.sleep(1)
-        
         conn.disconnect()
 
-    def startAmuAndRingEvent(self, stop_event, ss, might, automana, autoRuns):
+    def startAmuAndRingEvent(self, stop_event, buttonStatuses, assignedKeyStatus):
         stop_event = threading.Event()
-        thread  = threading.Thread(target=self.compare, args=(stop_event, ss, might, automana, autoRuns))
+        thread  = threading.Thread(target=self.compare, args=(stop_event, buttonStatuses, assignedKeyStatus))
         thread.start()
         return thread , stop_event
     
