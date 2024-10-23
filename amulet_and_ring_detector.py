@@ -86,10 +86,24 @@ class AmuletAndRingDetector():
         might = buttons[0]
         ss = buttons[1]
         vita = buttons[3]
+        maxVita = buttons[4]
+        utama = buttons[5]
         try:
             if not self.check_pixel_color(self.criticalX, self.lifeY, self.life_target_color):
+                pyautogui.press(might)
+                time.sleep(0.1)
+                pyautogui.press(ss)
+                time.sleep(0.1)
+                pyautogui.press(utama)
+                time.sleep(0.1)
+                pyautogui.press(maxVita)
+                time.sleep(0.1)
+                pyautogui.press(vita)
                 print('stone skin might i utama + leczenie')
             elif not self.check_pixel_color(self.halfX, self.lifeY, self.life_target_color):
+                pyautogui.press(maxVita)
+                time.sleep(0.1)
+                pyautogui.press(vita)
                 print('max vita')
             elif not self.check_pixel_color(self.almostFullX, self.lifeY, self.life_target_color):
                 pyautogui.press(vita)
@@ -132,8 +146,7 @@ class AmuletAndRingDetector():
                         print('mana i runa')
                 if buttonStatuses[4] == 1:
                     self.checkingLife(assignedKeyStatus)
-
-            time.sleep(1)
+            time.sleep(0.5)
         conn.disconnect()
 
     def startAmuAndRingEvent(self, stop_event, buttonStatuses, assignedKeyStatus):

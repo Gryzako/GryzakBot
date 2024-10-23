@@ -1,11 +1,17 @@
 Do do:
-1. Podzielić actions.oy na dobs i actionforamuandring
-2. dodac opcje AmuletAndRingDetector 
-3. dodac ustawienia klawiszy
-4. Utama na 20% życia
-5. powiazac assigne buttonow z backendem
-6. przesylac statusy buttonow i bindy a arrayu
-
+- Implement option to select how freqently program will be refreshing - default will be 0.5 s
+- start to implement cave bot
 
 Issues:
 - Why payautogui doesn't work well with function button like del, end and letters but works well with 1,2,F3,F4?
+
+
+Requirements to use bot:
+
+Tibia:
+- Ring and amulet - script will detect empty space for ring and amulet. Therefore spaces needs to be empty to initiate process.
+- Life and Health strips needs to be as second element from top. First needs to be map.
+- In Config tab all buttons needs to be assigned
+
+OBS:
+- WebSocker Server needs to be enabled with following settings : port: 4455 password: Ewelina1234

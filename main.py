@@ -57,6 +57,10 @@ class App(ck.CTk):
         self.UltimateManaLebale.grid(row=3, column=0)
         self.UltimateButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.UltimateButton))
         self.UltimateButton.grid(row=3, column=1)
+        self.utamoVitaLabel = self.create_label(self.tab.tab('Config'), text='Utamo vita')
+        self.utamoVitaLabel.grid(row=3, column=2)
+        self.utamoVitaButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.utamoVitaButton))
+        self.utamoVitaButton.grid(row=3, column=3)       
 
         #BOTconfiguration
         self.amuAndRingLabel = self.create_label(self.tab.tab('BOT'), text="Auto Ring and Amulet:")
@@ -83,9 +87,6 @@ class App(ck.CTk):
     
     def create_label(self, parent, text, width=100, height=40):
         return ck.CTkLabel(parent, text=text, width=width, height=height)
-    
-    def create_entry(self, parent,  width=100, height=30):
-        return ck.CTkEntry(parent, width=width, height=height)
     
     def create_checkbox(self, parent, text):
         return ck.CTkCheckBox(parent, text=text)
@@ -131,7 +132,8 @@ class App(ck.CTk):
         self.startButton.configure(state='disabled')
         self.stopButton.configure(state='normal')
         buttonStatuses = [self.mightringcheckbox.get(), self.stoneskincheckbox.get(), self.autoMana.get(), self.makeRuns.get(), self.autoHealing.get()]
-        assignedKeyStatus = [self.mightButton.cget('text'), self.ssButton.cget('text'), self.UltimateButton.cget('text'), self.exuraVitaButton.cget('text')] 
+        assignedKeyStatus = [self.mightButton.cget('text'), self.ssButton.cget('text'), self.UltimateButton.cget('text'), self.exuraVitaButton.cget('text'),
+                              self.exuraMaxVitaButton.cget('text'), self.utamoVitaButton.cget('text')] 
         print(assignedKeyStatus)
         obs_instance = AmuletAndRingDetector()
         self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, buttonStatuses, assignedKeyStatus)
