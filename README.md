@@ -1,6 +1,8 @@
 Do do:
 - Implement option to select how freqently program will be refreshing - default will be 0.5 s
 - start to implement cave bot
+- implement uh bot
+- known pictures and template moze to peoject folder /img
 
 Issues:
 - Why payautogui doesn't work well with function button like del, end and letters but works well with 1,2,F3,F4?

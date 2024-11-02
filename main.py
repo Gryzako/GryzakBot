@@ -1,5 +1,6 @@
 import customtkinter as ck
 import pygetwindow as gw
+import keyboard
 from pywinauto import Application
 from datetime import datetime
 from amulet_and_ring_detector import AmuletAndRingDetector
@@ -19,6 +20,9 @@ class App(ck.CTk):
         #STATIC variable
         self.amuRingThread = None
         self.AmuRingStop_event = None
+        self.autoUhEnabled = False
+        self.uhKeyAssigned = None
+        self.autoUhRunning = False
 
         #Tab configuration
         self.tab = ck.CTkTabview(self, width=400, height=300)
@@ -60,7 +64,13 @@ class App(ck.CTk):
         self.utamoVitaLabel = self.create_label(self.tab.tab('Config'), text='Utamo vita')
         self.utamoVitaLabel.grid(row=3, column=2)
         self.utamoVitaButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.utamoVitaButton))
-        self.utamoVitaButton.grid(row=3, column=3)       
+        self.utamoVitaButton.grid(row=3, column=3)  
+        self.makeRuneLabel = self.create_label(self.tab.tab('Config'), text='Make Run')
+        self.makeRuneLabel.grid(row=4, column=0)
+        self.makeRunButton = self.create_button(self.tab.tab('Config'), text='Assigne', command=lambda: self.start_key_assignment(self.makeRunButton))
+        self.makeRunButton.grid(row=4, column=1) 
+        self.uhNick = ck.CTkEntry(self.tab.tab('Config'), placeholder_text='Sio person nick', width=150, height=28)
+        self.uhNick.grid(row=5, column=1, columnspan=2, pady=15)
 
         #BOTconfiguration
         self.amuAndRingLabel = self.create_label(self.tab.tab('BOT'), text="Auto Ring and Amulet:")
@@ -77,10 +87,12 @@ class App(ck.CTk):
         self.autoMana.grid(row=5, column=0, pady=2, sticky="w")
         self.makeRuns = self.create_checkbox(self.tab.tab('BOT'), text='Make runs')
         self.makeRuns.grid(row=4, column=1, pady=2, sticky="w")
+        self.autoUh = self.create_checkbox(self.tab.tab('BOT'), text='Auto UH')
+        self.autoUh.grid(row=5, column=1, pady=2, sticky="w")
         self.startButton = self.create_button(self.tab.tab('BOT'), text='Start', command=self.startButton)
-        self.startButton.grid(row=6, column=0, pady=2, padx=5, sticky="e")
+        self.startButton.grid(row=6, column=0, pady=10, padx=5, sticky="e")
         self.stopButton = self.create_button(self.tab.tab('BOT'), text='Stop', state='disabled', command=self.stopButton)
-        self.stopButton.grid(row=6, column=1, pady=2, padx=5 )
+        self.stopButton.grid(row=6, column=1, pady=10, padx=5 )
     
     def create_button(self, parent, text, command=None, state='normal', width=70, height=30):
         return ck.CTkButton(parent, text=text, command=command, state=state, width=width, height=height)
@@ -98,6 +110,9 @@ class App(ck.CTk):
         button.configure(text=assigned_key)  # Zmiana tekstu klikniętego przycisku
         app.unbind("<KeyPress>")  # Odłączenie nasłuchiwania klawiatury
         self.logging(f"Key assigned: {assigned_key}")
+
+        if button == self.uhButton:
+            self.uhKeyAssigned = assigned_key
 
     # start listening for keyboard
     def start_key_assignment(self, button):
@@ -128,15 +143,35 @@ class App(ck.CTk):
         self.logBox.insert('0.0', f"{self.dt_string} - {message}\n")
         self.logBox.configure(state='disabled')
 
+    def start_auto_uh_listener(self):
+        if self.uhKeyAssigned and self.autoUhEnabled:
+            keyboard.on_press_key(self.uhKeyAssigned, self.start_auto_uh_logic)
+            keyboard.on_release_key(self.uhKeyAssigned, self.stop_auto_uh_logic)
+
+    def start_auto_uh_logic(self, event=None):
+        if not self.autoUhRunning:
+            self.autoUhRunning = True
+            action = AmuletAndRingDetector()
+            action.autoUhPerson(self.uhNick.get())
+
+    def stop_auto_uh_logic(self, event=None):
+        if self.autoUhRunning:
+            self.autoUhRunning = False
+
     def startButton(self):
         self.startButton.configure(state='disabled')
         self.stopButton.configure(state='normal')
-        buttonStatuses = [self.mightringcheckbox.get(), self.stoneskincheckbox.get(), self.autoMana.get(), self.makeRuns.get(), self.autoHealing.get()]
+        buttonStatuses = [self.mightringcheckbox.get(), self.stoneskincheckbox.get(), self.autoMana.get(), self.makeRuns.get(), self.autoHealing.get(), self.autoUh.get()]
         assignedKeyStatus = [self.mightButton.cget('text'), self.ssButton.cget('text'), self.UltimateButton.cget('text'), self.exuraVitaButton.cget('text'),
-                              self.exuraMaxVitaButton.cget('text'), self.utamoVitaButton.cget('text')] 
-        print(assignedKeyStatus)
+                              self.exuraMaxVitaButton.cget('text'), self.utamoVitaButton.cget('text'), self.uhButton.cget('text'), self.makeRunButton.cget('text') ] 
         obs_instance = AmuletAndRingDetector()
         self.amuRingThread, self.AmuRingStop_event = obs_instance.startAmuAndRingEvent(self, buttonStatuses, assignedKeyStatus)
+
+        self.autoUhEnabled = self.autoUh.get()
+        if self.autoUhEnabled:
+            self.logging("Auto UH is enabled. Pressing UH button will print 'uhh'.")
+            self.start_auto_uh_listener()
+
         self.find_and_focus_tibia_window()
 
     def stopButton(self):
@@ -144,6 +179,9 @@ class App(ck.CTk):
         self.stopButton.configure(state='disabled')
         obs_instance = AmuletAndRingDetector()
         obs_instance.stopAmuAndRingEvent(self.AmuRingStop_event, self.amuRingThread)
+        if self.uhKeyAssigned:
+            keyboard.remove_hotkey(self.uhKeyAssigned)
+        self.autoUhRunning = False
         self.logging(f"Stopped application")
 
 if __name__ == "__main__":

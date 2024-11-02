@@ -1,5 +1,6 @@
 import time
 import pyautogui
+import keyboard
 import cv2
 from PIL import Image
 import threading
@@ -111,6 +112,9 @@ class AmuletAndRingDetector():
         except Exception as e:
             print(e)
 
+    def autoUhPerson(self, nick):
+        print(f'Uham {nick}')
+
     def compare(self, stop_event, buttonStatuses, assignedKeyStatus):
         conn = self.connectToOBS(self.host, self.port, self.password)
 
@@ -133,16 +137,16 @@ class AmuletAndRingDetector():
                         print('Mana Pełna')
                     else:
                         print('doladuj mane')
-                        pyautogui.press('0')
+                        pyautogui.press(assignedKeyStatus[2])
                 if buttonStatuses[3] == 1:
                     if self.check_pixel_color(self.almostFullX, self.manaY, self.mana_target_color):
-                        pyautogui.press('f6')
+                        pyautogui.press(assignedKeyStatus[7])
                         print('tylko runa')
                         time.sleep(1)
                     else:
-                        pyautogui.press('0')
+                        pyautogui.press(assignedKeyStatus[2])
                         time.sleep(0.1)
-                        pyautogui.press('f6')
+                        pyautogui.press(assignedKeyStatus[7])
                         print('mana i runa')
                 if buttonStatuses[4] == 1:
                     self.checkingLife(assignedKeyStatus)
